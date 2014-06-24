@@ -406,7 +406,7 @@ describe Container do
       container.should_receive(:new_container_with_bind_mounts).with(bind_mounts)
       container.should_receive(:limit_cpu).with(params[:limit_cpu])
       container.should_receive(:limit_disk).with(byte: params[:byte], inode: params[:inode])
-      container.should_receive(:limit_memory).with(params[:limit_memory])
+#      container.should_receive(:limit_memory).with(params[:limit_memory])
       container.should_receive(:setup_inbound_network)
       container.should_receive(:setup_egress_rules).with(params[:egress_rules])
 
@@ -419,7 +419,7 @@ describe Container do
       container.stub(:new_container_with_bind_mounts)
       container.stub(:limit_cpu)
       container.stub(:limit_disk)
-      container.stub(:limit_memory)
+#      container.stub(:limit_memory)
       container.stub(:setup_egress_rules)
 
       container.should_not_receive(:setup_inbound_network)
