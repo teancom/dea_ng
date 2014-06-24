@@ -119,7 +119,7 @@ class Container
       new_container_with_bind_mounts(params[:bind_mounts])
       limit_cpu(params[:limit_cpu])
       limit_disk(byte: params[:byte], inode: params[:inode])
-      limit_memory(params[:limit_memory])
+      # limit_memory(params[:limit_memory])
       setup_inbound_network if params[:setup_inbound_network]
       setup_egress_rules(params[:egress_rules])
     end
