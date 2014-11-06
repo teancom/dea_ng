@@ -28,6 +28,7 @@ module Dea
           "instance_index" => @message.index,
           "host" => "0.0.0.0",
           "port" => @instance.instance_container_port,
+          "extra_ports" => @instance.extra_ports,
           "started_at" => start_time,
           "started_at_timestamp" => start_time.to_i,
           "start" => start_time,

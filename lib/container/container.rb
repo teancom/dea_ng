@@ -19,11 +19,13 @@ class Container
 
   attr_accessor :handle
   attr_reader :path, :host_ip, :container_ip, :network_ports
+  attr_accessor :extra_ports
 
   def initialize(client_provider)
     @client_provider = client_provider
     @path = nil
     @network_ports = {}
+    @extra_ports = {}
   end
 
   def update_path_and_ip
@@ -121,7 +123,7 @@ class Container
       limit_cpu(params[:limit_cpu])
       limit_disk(byte: params[:byte], inode: params[:inode])
       limit_memory(params[:limit_memory])
-      setup_inbound_network if params[:setup_inbound_network]
+      setup_inbound_network(params[:extra_port_labels]) if params[:setup_inbound_network]
       setup_egress_rules(params[:egress_rules])
     end
   end
@@ -160,10 +162,18 @@ class Container
     @client_provider.close_all
   end
 
-  def setup_inbound_network
+  def setup_inbound_network(extra_port_labels)
     response = call(:app, ::Warden::Protocol::NetInRequest.new(handle: handle))
     network_ports['host_port'] = response.host_port
     network_ports['container_port'] = response.container_port
+    extra_port_labels.each { |label| setup_extra_port(label) } if extra_port_labels
+  end
+
+  def setup_extra_port(label)
+    response = call(:app, ::Warden::Protocol::NetInRequest.new(handle: handle))
+    extra_ports[label] = {}
+    extra_ports[label]['host_port'] = response.host_port
+    extra_ports[label]['container_port'] = response.container_port
   end
 
   def info

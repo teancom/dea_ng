@@ -541,6 +541,7 @@ module Dea
           inode: config.instance_disk_inode_limit,
           limit_memory: memory_limit_in_bytes,
           setup_inbound_network: with_network,
+          extra_port_labels: extra_port_labels,
           egress_rules: egress_network_rules)
 
         attributes['warden_handle'] = container.handle
@@ -556,6 +557,17 @@ module Dea
 
     def instance_container_port
       container.network_ports['container_port']
+    end
+
+    def extra_ports
+      container.extra_ports
+    end
+
+    def extra_port_labels
+      @extra_ports ||= begin
+        labels = attributes['environment']['CF_EXTRA_PORTS'] || ""
+        labels.split(",").map(&:strip)
+      end
     end
 
     def promise_droplet
@@ -875,6 +887,7 @@ module Dea
         'warden_container_ip' => container.container_ip,
         'instance_host_port' => container.network_ports['host_port'],
         'instance_container_port' => container.network_ports['container_port'],
+        'extra_ports' => container.extra_ports.dup,
 
         'syslog_drain_urls' => attributes['services'].map { |svc_hash| svc_hash['syslog_drain_url'] }.compact,
 
@@ -888,6 +901,7 @@ module Dea
       container.handle = @attributes['warden_handle']
       container.network_ports['host_port'] = @attributes['instance_host_port']
       container.network_ports['container_port'] = @attributes['instance_container_port']
+      container.extra_ports = (@attributes['extra_ports'] || {})
     end
 
     def determine_exit_description_from_link_response(link_response)
