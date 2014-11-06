@@ -49,7 +49,15 @@ class Upload
   private
 
   def poll(polling_destination, &upload_callback)
-    logger.debug("em-upload.polling", polling_destination: polling_destination)
+    logger.debug("em-upload.polling", upload_destination: @destination, polling_destination: polling_destination)
+
+    if polling_destination.relative?
+      polling_destination.scheme = @destination.scheme
+      polling_destination.userinfo = @destination.userinfo
+      polling_destination.host = @destination.host
+      polling_destination.port = @destination.port
+    end
+
     http = EM::HttpRequest.new(polling_destination).get
     http.errback do
       logger.warn("em-upload.polling.handle_error")

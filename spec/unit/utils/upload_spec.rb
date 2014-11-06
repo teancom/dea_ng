@@ -98,6 +98,65 @@ describe Upload do
         end
       end
 
+      context "and the polling url is fully qualified" do
+        let(:job_url) { "http://127.0.0.1:11111/v2/jobs/123" }
+        let(:finished_json_string) { JSON.dump(job_json.merge(entity: {guid: 123, status: "finished"})) }
+
+        before do
+          start_http_server(12345) do |connection, _|
+            create_response(connection, job_string)
+          end
+
+          start_http_server(11111) do |connection, _|
+            create_response(connection, finished_json_string)
+          end
+        end
+
+        it "should not use the information from the upload url when polling" do
+          subject.upload! do |error|
+            expect(error).to be_nil
+            done
+          end
+        end
+      end
+
+      context "and the polling url is relative to the upload" do
+        let(:job_url) { "/v2/jobs/123" }
+        let(:finished_json_string) { JSON.dump(job_json.merge(entity: {guid: 123, status: "finished"})) }
+
+        before do
+          counter = 0
+          start_http_server(12345) do |connection, body|
+            @requests ||= []
+            create_response(connection, counter < 2 ? job_string : finished_json_string)
+            counter += 1
+            @requests << body
+          end
+        end
+
+        it "should poll the host from the upload url but with the job polling path" do
+          subject.upload! do |error|
+            expect(error).to be_nil
+            done
+          end
+        end
+
+        context "and the upload url contains credentials" do
+          let(:to_uri) { URI("http://user:password@127.0.0.1:12345/v2/jobs/123") }
+
+          it "should use same credentials for polling and upload" do
+            subject.upload! do |error|
+              expect(error).to be_nil
+              authorization = @requests[0].split("\r\n").select { |line|
+                line.start_with?("Authorization:")
+              }.first
+              expect(@requests.select{ |req| req.include?(authorization) }).to match_array(@requests)
+              done
+            end
+          end
+        end
+      end
+
       context "and the polling URL is valid and the polling returns a 2xx" do
         let(:finished_json_string) { JSON.dump(job_json.merge(entity: {guid: 123, status: "finished"})) }
 
