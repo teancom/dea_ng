@@ -27,6 +27,7 @@ module Dea
           "instance_id" => @instance.attributes["instance_id"],
           "instance_index" => @message.index,
           "host" => "0.0.0.0",
+          "host_ip" => @instance.instance_host_ip,
           "port" => @instance.instance_container_port,
           "extra_ports" => @instance.extra_ports,
           "started_at" => start_time,

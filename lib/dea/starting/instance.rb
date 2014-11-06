@@ -551,6 +551,10 @@ module Dea
       end
     end
 
+    def instance_host_ip
+      VCAP.local_ip
+    end
+
     def instance_host_port
       container.network_ports['host_port']
     end
