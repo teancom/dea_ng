@@ -27,8 +27,8 @@ describe Upload do
 
     let(:job_json) do
       {
-          metadata: {guid: 123, created_at: Time.now.to_s, url: job_url},
-          entity: {guid: 123, status: status}
+        metadata: {guid: 123, created_at: Time.now.to_s, url: job_url},
+        entity: {guid: 123, status: status}
       }
     end
 
@@ -53,10 +53,10 @@ describe Upload do
     it "creates the correct multipart request (with a high inactivity timeout which should be removed when everything is aysnc)" do
       expect(EM::HttpRequest).to receive(:new).with(to_uri, inactivity_timeout: 300).and_return(http)
       expect(http).to receive(:post).with(
-                          head: {'x-cf-multipart' => {name: "upload[droplet]", filename: anything}},
-                          file: file_to_upload.path,
-                          query: {async: "true"}
-                      )
+        head: {'x-cf-multipart' => {name: "upload[droplet]", filename: anything}},
+        file: file_to_upload.path,
+        query: {async: "true"}
+      )
 
       subject.upload! {}
 

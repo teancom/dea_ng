@@ -21,9 +21,9 @@ class Upload
         upload_callback.call(error)
       else
         logger.debug("em-upload.completion.success", destination: @destination,
-                    response: http.response,
-                    class: http.response.class.name,
-                    include: http.response.include?("url")
+          response: http.response,
+          class: http.response.class.name,
+          include: http.response.include?("url")
         )
         if http.response.include?("url")
           begin
@@ -67,21 +67,21 @@ class Upload
       response = JSON.parse(http.response)
 
       case response.fetch("entity", {}).fetch("status", nil)
-        when "finished"
-          logger.debug("em-upload.polling.success.job-done")
-          upload_callback.call nil
-        when "failed"
-          logger.warn("em-upload.polling.failed", response: http.response)
-          upload_callback.call UploadError.new("Polling", http)
+      when "finished"
+        logger.debug("em-upload.polling.success.job-done")
+        upload_callback.call nil
+      when "failed"
+        logger.warn("em-upload.polling.failed", response: http.response)
+        upload_callback.call UploadError.new("Polling", http)
+      else
+        @remaining_polling_time -= POLLING_INTERVAL
+        if @remaining_polling_time <= 0
+          logger.warn("em-upload.polling.timing-out")
+          upload_callback.call UploadError.new("Job took too long", http)
         else
-          @remaining_polling_time -= POLLING_INTERVAL
-          if @remaining_polling_time <= 0
-            logger.warn("em-upload.polling.timing-out")
-            upload_callback.call UploadError.new("Job took too long", http)
-          else
-            logger.debug("em-upload.polling.retry")
-            EM.add_timer(POLLING_INTERVAL) { poll(polling_destination, &upload_callback) }
-          end
+          logger.debug("em-upload.polling.retry")
+          EM.add_timer(POLLING_INTERVAL) { poll(polling_destination, &upload_callback) }
+        end
       end
     else
       handle_error(http, polling_destination, upload_callback)
@@ -95,12 +95,12 @@ class Upload
 
     open_connection_count = EM.connection_count # https://github.com/igrigorik/em-http-request/issues/190 says to check connection_count
     logger.warn("em-upload.error",
-                destination: @destination,
-                connection_count: open_connection_count,
-                message: error.message,
-                http_error: http.error,
-                http_status: http.response_header.status,
-                http_response: http.response)
+      destination: @destination,
+      connection_count: open_connection_count,
+      message: error.message,
+      http_error: http.error,
+      http_status: http.response_header.status,
+      http_response: http.response)
 
     upload_callback.call(error)
   end
