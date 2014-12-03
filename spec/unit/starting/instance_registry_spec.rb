@@ -559,6 +559,19 @@ describe Dea::InstanceRegistry do
     instance
   end
 
+  def register_starting_instance(instance_registry, options = {})
+    instance = Dea::Instance.new(bootstrap, {})
+    instance.state = Dea::Instance::State::STARTING
+
+    options.each do |key, value|
+      instance.stub(key).and_return(value)
+    end
+
+    instance_registry.register(instance) if instance_registry
+
+    instance
+  end
+
   def register_stopping_instance(instance_registry, options = {})
     instance = Dea::Instance.new(bootstrap, {})
     instance.state = Dea::Instance::State::STOPPING
