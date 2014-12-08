@@ -204,7 +204,7 @@ module Dea
       Promise.new do |p|
         # Some buildpacks seem to make assumption that /app is a non-empty directory
         # See: https://github.com/heroku/heroku-buildpack-python/blob/master/bin/compile#L46
-        script = 'mkdir -p /app && touch /app/support_heroku_buildpacks && chown -R vcap:vcap /app'
+        script = 'mkdir -p /app && touch /app/support_heroku_buildpacks && chown -R vcap:vcap /app && mkdir -p /opt && chown -R vcap:vcap /opt'
 
         logger.info('staging.task.making-app-dir', script: script)
 
